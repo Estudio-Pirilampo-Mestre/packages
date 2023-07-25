@@ -432,6 +432,13 @@ class MarkdownBuilder implements md.NodeVisitor {
           border: styleSheet.tableBorder,
           children: _tables.removeLast().rows,
         );
+
+        if (styleSheet.tableColumnWidth! is! FlexColumnWidth) {
+          child = SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: child,
+          );
+        }
       } else if (tag == 'blockquote') {
         _isInBlockquote = false;
         child = DecoratedBox(
