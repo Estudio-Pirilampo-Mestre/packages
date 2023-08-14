@@ -48,6 +48,7 @@ class MarkdownStyleSheet {
     this.codeblockPadding,
     this.codeblockDecoration,
     this.horizontalRuleDecoration,
+    this.horizontalRulePadding,
     this.textAlign = WrapAlignment.start,
     this.h1Align = WrapAlignment.start,
     this.h2Align = WrapAlignment.start,
@@ -616,6 +617,9 @@ class MarkdownStyleSheet {
 
   /// The decoration to use for `hr` elements.
   final Decoration? horizontalRuleDecoration;
+
+  /// The padding to use for `hr` elements.
+  final EdgeInsets? horizontalRulePadding;
 
   /// The [WrapAlignment] to use for normal text. Defaults to start.
   final WrapAlignment textAlign;
