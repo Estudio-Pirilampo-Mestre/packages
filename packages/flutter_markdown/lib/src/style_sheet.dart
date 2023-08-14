@@ -370,6 +370,7 @@ class MarkdownStyleSheet {
     EdgeInsets? codeblockPadding,
     Decoration? codeblockDecoration,
     Decoration? horizontalRuleDecoration,
+    EdgeInsets? horizontalRulePadding,
     WrapAlignment? textAlign,
     WrapAlignment? h1Align,
     WrapAlignment? h2Align,
@@ -425,6 +426,8 @@ class MarkdownStyleSheet {
       codeblockDecoration: codeblockDecoration ?? this.codeblockDecoration,
       horizontalRuleDecoration:
           horizontalRuleDecoration ?? this.horizontalRuleDecoration,
+      horizontalRulePadding:
+          horizontalRulePadding ?? this.horizontalRulePadding,
       textAlign: textAlign ?? this.textAlign,
       h1Align: h1Align ?? this.h1Align,
       h2Align: h2Align ?? this.h2Align,
@@ -486,6 +489,7 @@ class MarkdownStyleSheet {
       codeblockPadding: other.codeblockPadding,
       codeblockDecoration: other.codeblockDecoration,
       horizontalRuleDecoration: other.horizontalRuleDecoration,
+      horizontalRulePadding: other.horizontalRulePadding,
       textAlign: other.textAlign,
       h1Align: other.h1Align,
       h2Align: other.h2Align,
@@ -710,6 +714,7 @@ class MarkdownStyleSheet {
         other.codeblockPadding == codeblockPadding &&
         other.codeblockDecoration == codeblockDecoration &&
         other.horizontalRuleDecoration == horizontalRuleDecoration &&
+        other.horizontalRulePadding == horizontalRulePadding &&
         other.textAlign == textAlign &&
         other.h1Align == h1Align &&
         other.h2Align == h2Align &&
@@ -767,6 +772,7 @@ class MarkdownStyleSheet {
       codeblockPadding,
       codeblockDecoration,
       horizontalRuleDecoration,
+      horizontalRulePadding,
       textAlign,
       h1Align,
       h2Align,
