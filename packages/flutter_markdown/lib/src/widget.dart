@@ -56,6 +56,25 @@ abstract class SyntaxHighlighter {
   TextSpan format(String source);
 }
 
+/// An interface for a block builder.
+abstract class MarkdownBlockBuilder extends MarkdownElementBuilder {
+  @override
+  Widget visitElementAfterWithContext(
+    BuildContext context,
+    md.Element element,
+    TextStyle? preferredStyle,
+    TextStyle? parentStyle, {
+    Widget? child,
+  }) {
+    return super.visitElementAfterWithContext(
+      context,
+      element,
+      preferredStyle,
+      parentStyle,
+    )!;
+  }
+}
+
 /// An interface for an element builder.
 abstract class MarkdownElementBuilder {
   /// Called when an Element has been reached, before its children have been

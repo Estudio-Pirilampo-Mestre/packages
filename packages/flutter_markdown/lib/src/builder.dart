@@ -32,8 +32,6 @@ const List<String> _kBlockTags = <String>[
 
 const List<String> _kListTags = <String>['ul', 'ol'];
 
-bool _isBlockTag(String? tag) => _kBlockTags.contains(tag);
-
 bool _isListTag(String tag) => _kListTags.contains(tag);
 
 class _BlockElement {
@@ -173,6 +171,9 @@ class MarkdownBuilder implements md.NodeVisitor {
   String? _currentBlockTag;
   String? _lastVisitedTag;
   bool _isInBlockquote = false;
+
+  bool _isBlockTag(String? tag) =>
+      _kBlockTags.contains(tag) || builders[tag] is MarkdownBlockBuilder;
 
   /// Returns widgets that display the given Markdown nodes.
   ///
@@ -385,7 +386,20 @@ class MarkdownBuilder implements md.NodeVisitor {
         child = const SizedBox();
       }
 
-      if (_isListTag(tag)) {
+      if (tag == 'blockquote') {
+        _isInBlockquote = false;
+      }
+
+      if (builders.containsKey(tag)) {
+        child = (builders[tag]! as MarkdownBlockBuilder)
+            .visitElementAfterWithContext(
+          delegate.context,
+          element,
+          styleSheet.styles[tag],
+          null,
+          child: child,
+        );
+      } else if (_isListTag(tag)) {
         assert(_listIndents.isNotEmpty);
         _listIndents.removeLast();
       } else if (tag == 'li') {
@@ -440,7 +454,6 @@ class MarkdownBuilder implements md.NodeVisitor {
           );
         }
       } else if (tag == 'blockquote') {
-        _isInBlockquote = false;
         child = DecoratedBox(
           decoration: styleSheet.blockquoteDecoration!,
           child: Padding(
@@ -792,6 +805,11 @@ class MarkdownBuilder implements md.NodeVisitor {
       case 'li':
         break;
     }
+
+    if (styleSheet.customBlockAlignments.containsKey(blockTag)) {
+      return styleSheet.customBlockAlignments[blockTag]!;
+    }
+
     return WrapAlignment.start;
   }
 

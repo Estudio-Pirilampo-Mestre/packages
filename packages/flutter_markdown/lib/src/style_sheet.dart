@@ -61,6 +61,8 @@ class MarkdownStyleSheet {
     this.blockquoteAlign = WrapAlignment.start,
     this.codeblockAlign = WrapAlignment.start,
     this.textScaleFactor,
+    this.customBlockAlignments = const <String, WrapAlignment>{},
+    this.customBlockTextStyles = const <String, TextStyle?>{},
   }) : _styles = <String, TextStyle?>{
           'a': a,
           'p': p,
@@ -82,6 +84,7 @@ class MarkdownStyleSheet {
           'th': tableHead,
           'tr': tableBody,
           'td': tableBody,
+          ...customBlockTextStyles,
         };
 
   /// Creates a [MarkdownStyleSheet] from the [TextStyle]s in the provided [ThemeData].
@@ -383,6 +386,8 @@ class MarkdownStyleSheet {
     WrapAlignment? blockquoteAlign,
     WrapAlignment? codeblockAlign,
     double? textScaleFactor,
+    Map<String, WrapAlignment>? customBlockAlignments,
+    Map<String, TextStyle?>? customBlockTextStyles,
   }) {
     return MarkdownStyleSheet(
       a: a ?? this.a,
@@ -440,6 +445,10 @@ class MarkdownStyleSheet {
       blockquoteAlign: blockquoteAlign ?? this.blockquoteAlign,
       codeblockAlign: codeblockAlign ?? this.codeblockAlign,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      customBlockAlignments:
+          customBlockAlignments ?? this.customBlockAlignments,
+      customBlockTextStyles:
+          customBlockTextStyles ?? this.customBlockTextStyles,
     );
   }
 
@@ -502,6 +511,8 @@ class MarkdownStyleSheet {
       blockquoteAlign: other.blockquoteAlign,
       codeblockAlign: other.codeblockAlign,
       textScaleFactor: other.textScaleFactor,
+      customBlockAlignments: other.customBlockAlignments,
+      customBlockTextStyles: other.customBlockTextStyles,
     );
   }
 
@@ -661,6 +672,16 @@ class MarkdownStyleSheet {
   /// The text scale factor to use in textual elements
   final double? textScaleFactor;
 
+  /// Alignments for custom Block elements.
+  ///
+  /// The key is the node's tag.
+  final Map<String, WrapAlignment> customBlockAlignments;
+
+  /// Text style for custom Block elements.
+  ///
+  /// The key is the node's tag.
+  final Map<String, TextStyle?> customBlockTextStyles;
+
   /// A [Map] from element name to the corresponding [TextStyle] object.
   Map<String, TextStyle?> get styles => _styles;
   Map<String, TextStyle?> _styles;
@@ -726,7 +747,9 @@ class MarkdownStyleSheet {
         other.orderedListAlign == orderedListAlign &&
         other.blockquoteAlign == blockquoteAlign &&
         other.codeblockAlign == codeblockAlign &&
-        other.textScaleFactor == textScaleFactor;
+        other.textScaleFactor == textScaleFactor &&
+        other.customBlockAlignments == customBlockAlignments &&
+        other.customBlockTextStyles == customBlockTextStyles;
   }
 
   @override
@@ -785,6 +808,8 @@ class MarkdownStyleSheet {
       blockquoteAlign,
       codeblockAlign,
       textScaleFactor,
+      customBlockAlignments,
+      customBlockTextStyles,
     ]);
   }
 }
