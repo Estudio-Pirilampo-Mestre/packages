@@ -7,6 +7,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// Returns dict[key], or nil if dict[key] is NSNull.
+extern id _Nullable FGMGetValueOrNilFromDict(NSDictionary *dict, NSString *key);
+
 @interface FLTGoogleMapJSONConversions : NSObject
 
 + (CLLocationCoordinate2D)locationFromLatLong:(NSArray *)latlong;
@@ -24,6 +27,21 @@ NS_ASSUME_NONNULL_BEGIN
 + (GMSCoordinateBounds *)coordinateBoundsFromLatLongs:(NSArray *)latlongs;
 + (GMSMapViewType)mapViewTypeFromTypeValue:(NSNumber *)value;
 + (nullable GMSCameraUpdate *)cameraUpdateFromChannelValue:(NSArray *)channelValue;
+
+/// Return GMS strokestyle object array populated using the patterns and stroke colors passed in.
+///
+/// @param patterns An array of patterns for each stroke in the polyline.
+/// @param strokeColor An array of color for each stroke in the polyline.
+/// @return An array of GMSStrokeStyle.
++ (NSArray<GMSStrokeStyle *> *)strokeStylesFromPatterns:(NSArray<NSArray<NSObject *> *> *)patterns
+                                            strokeColor:(UIColor *)strokeColor;
+
+/// Return GMS strokestyle object array populated using the patterns and stroke colors passed in.
+/// Extracts the lengths of each stroke in the polyline from patterns input
+///
+/// @param patterns An array of object representing the pattern params in the polyline.
+/// @return Array of lengths.
++ (NSArray<NSNumber *> *)spanLengthsFromPatterns:(NSArray<NSArray<NSObject *> *> *)patterns;
 
 @end
 

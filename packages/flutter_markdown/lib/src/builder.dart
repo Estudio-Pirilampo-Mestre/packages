@@ -172,7 +172,6 @@ class MarkdownBuilder implements md.NodeVisitor {
   final List<_TableElement> _tables = <_TableElement>[];
   final List<_InlineElement> _inlines = <_InlineElement>[];
   final List<GestureRecognizer> _linkHandlers = <GestureRecognizer>[];
-  final ScrollController _preScrollController = ScrollController();
   String? _currentBlockTag;
   String? _lastVisitedTag;
   bool _isInBlockquote = false;
@@ -348,10 +347,11 @@ class MarkdownBuilder implements md.NodeVisitor {
       child = builders[_blocks.last.tag!]!
           .visitText(text, styleSheet.styles[_blocks.last.tag!]);
     } else if (_blocks.last.tag == 'pre') {
+      final ScrollController preScrollController = ScrollController();
       child = Scrollbar(
-        controller: _preScrollController,
+        controller: preScrollController,
         child: SingleChildScrollView(
-          controller: _preScrollController,
+          controller: preScrollController,
           scrollDirection: Axis.horizontal,
           padding: styleSheet.codeblockPadding,
           child: _buildRichText(delegate.formatText(styleSheet, text.text)),
@@ -452,18 +452,19 @@ class MarkdownBuilder implements md.NodeVisitor {
           );
         }
       } else if (tag == 'table') {
-        child = Table(
-          defaultColumnWidth: styleSheet.tableColumnWidth!,
-          defaultVerticalAlignment: styleSheet.tableVerticalAlignment,
-          border: styleSheet.tableBorder,
-          children: _tables.removeLast().rows,
-        );
-
-        if (styleSheet.tableColumnWidth! is! FlexColumnWidth) {
-          child = SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: child,
+        if (styleSheet.tableColumnWidth is! FlexColumnWidth) {
+          final ScrollController tableScrollController = ScrollController();
+          child = Scrollbar(
+            controller: tableScrollController,
+            child: SingleChildScrollView(
+              controller: tableScrollController,
+              scrollDirection: Axis.horizontal,
+              padding: styleSheet.tablePadding,
+              child: _buildTable(),
+            ),
           );
+        } else {
+          child = _buildTable();
         }
       } else if (tag == 'blockquote') {
         child = DecoratedBox(
@@ -541,7 +542,7 @@ class MarkdownBuilder implements md.NodeVisitor {
           _mergeInlineChildren(current.children, align),
           textAlign: align,
         );
-        _ambiguate(_tables.single.rows.last.children)!.add(child);
+        _tables.single.rows.last.children.add(child);
       } else if (tag == 'a') {
         _linkHandlers.removeLast();
       } else if (tag == 'sup') {
@@ -560,6 +561,8 @@ class MarkdownBuilder implements md.NodeVisitor {
               style: textSpan.style?.copyWith(
                 fontFeatures: <FontFeature>[
                   const FontFeature.enable('sups'),
+                  if (styleSheet.superscriptFontFeatureTag != null)
+                    FontFeature.enable(styleSheet.superscriptFontFeatureTag!),
                 ],
               ),
             ),
@@ -579,6 +582,15 @@ class MarkdownBuilder implements md.NodeVisitor {
     _lastVisitedTag = tag;
   }
 
+  Table _buildTable() {
+    return Table(
+      defaultColumnWidth: styleSheet.tableColumnWidth!,
+      defaultVerticalAlignment: styleSheet.tableVerticalAlignment,
+      border: styleSheet.tableBorder,
+      children: _tables.removeLast().rows,
+    );
+  }
+
   Widget _buildImage(String src, String? title, String? alt) {
     final List<String> parts = src.split('#');
     if (parts.isEmpty) {
@@ -591,8 +603,8 @@ class MarkdownBuilder implements md.NodeVisitor {
     if (parts.length == 2) {
       final List<String> dimensions = parts.last.split('x');
       if (dimensions.length == 2) {
-        width = double.parse(dimensions[0]);
-        height = double.parse(dimensions[1]);
+        width = double.tryParse(dimensions[0]);
+        height = double.tryParse(dimensions[1]);
       }
     }
 
@@ -634,8 +646,15 @@ class MarkdownBuilder implements md.NodeVisitor {
     if (bulletBuilder != null) {
       return Padding(
         padding: styleSheet.listBulletPadding!,
-        child: bulletBuilder!(index,
-            isUnordered ? BulletStyle.unorderedList : BulletStyle.orderedList),
+        child: bulletBuilder!(
+          MarkdownBulletParameters(
+            index: index,
+            style: isUnordered
+                ? BulletStyle.unorderedList
+                : BulletStyle.orderedList,
+            nestLevel: _listIndents.length - 1,
+          ),
+        ),
       );
     }
 
@@ -980,9 +999,10 @@ class MarkdownBuilder implements md.NodeVisitor {
         text!,
         textScaler: styleSheet.textScaler,
         textAlign: textAlign ?? TextAlign.start,
-        onSelectionChanged:
-            (TextSelection selection, SelectionChangedCause? cause) =>
-                onSelectionChanged!(text.text, selection, cause),
+        onSelectionChanged: onSelectionChanged != null
+            ? (TextSelection selection, SelectionChangedCause? cause) =>
+                onSelectionChanged!(text.text, selection, cause)
+            : null,
         onTap: onTapText,
         key: k,
       );
@@ -995,10 +1015,4 @@ class MarkdownBuilder implements md.NodeVisitor {
       );
     }
   }
-
-  /// This allows a value of type T or T? to be treated as a value of type T?.
-  ///
-  /// We use this so that APIs that have become non-nullable can still be used
-  /// with `!` and `?` on the stable branch.
-  T? _ambiguate<T>(T? value) => value;
 }

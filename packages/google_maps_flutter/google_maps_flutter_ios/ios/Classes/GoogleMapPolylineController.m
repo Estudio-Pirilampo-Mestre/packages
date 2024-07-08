@@ -59,41 +59,53 @@
   self.polyline.geodesic = isGeodesic;
 }
 
+- (void)setPattern:(NSArray<GMSStrokeStyle *> *)styles lengths:(NSArray<NSNumber *> *)lengths {
+  self.polyline.spans = GMSStyleSpans(self.polyline.path, styles, lengths, kGMSLengthRhumb);
+}
+
 - (void)interpretPolylineOptions:(NSDictionary *)data
                        registrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-  NSNumber *consumeTapEvents = data[@"consumeTapEvents"];
-  if (consumeTapEvents && consumeTapEvents != (id)[NSNull null]) {
+  NSNumber *consumeTapEvents = FGMGetValueOrNilFromDict(data, @"consumeTapEvents");
+  if (consumeTapEvents) {
     [self setConsumeTapEvents:[consumeTapEvents boolValue]];
   }
 
-  NSNumber *visible = data[@"visible"];
-  if (visible && visible != (id)[NSNull null]) {
+  NSNumber *visible = FGMGetValueOrNilFromDict(data, @"visible");
+  if (visible) {
     [self setVisible:[visible boolValue]];
   }
 
-  NSNumber *zIndex = data[@"zIndex"];
-  if (zIndex && zIndex != (id)[NSNull null]) {
+  NSNumber *zIndex = FGMGetValueOrNilFromDict(data, @"zIndex");
+  if (zIndex) {
     [self setZIndex:[zIndex intValue]];
   }
 
-  NSArray *points = data[@"points"];
-  if (points && points != (id)[NSNull null]) {
+  NSArray *points = FGMGetValueOrNilFromDict(data, @"points");
+  if (points) {
     [self setPoints:[FLTGoogleMapJSONConversions pointsFromLatLongs:points]];
   }
 
-  NSNumber *strokeColor = data[@"color"];
-  if (strokeColor && strokeColor != (id)[NSNull null]) {
+  NSNumber *strokeColor = FGMGetValueOrNilFromDict(data, @"color");
+  if (strokeColor) {
     [self setColor:[FLTGoogleMapJSONConversions colorFromRGBA:strokeColor]];
   }
 
-  NSNumber *strokeWidth = data[@"width"];
-  if (strokeWidth && strokeWidth != (id)[NSNull null]) {
+  NSNumber *strokeWidth = FGMGetValueOrNilFromDict(data, @"width");
+  if (strokeWidth) {
     [self setStrokeWidth:[strokeWidth intValue]];
   }
 
-  NSNumber *geodesic = data[@"geodesic"];
-  if (geodesic && geodesic != (id)[NSNull null]) {
+  NSNumber *geodesic = FGMGetValueOrNilFromDict(data, @"geodesic");
+  if (geodesic) {
     [self setGeodesic:geodesic.boolValue];
+  }
+
+  NSArray *patterns = FGMGetValueOrNilFromDict(data, @"pattern");
+  if (patterns) {
+    [self
+        setPattern:[FLTGoogleMapJSONConversions strokeStylesFromPatterns:patterns
+                                                             strokeColor:self.polyline.strokeColor]
+           lengths:[FLTGoogleMapJSONConversions spanLengthsFromPatterns:patterns]];
   }
 }
 
@@ -125,7 +137,7 @@
 }
 - (void)addPolylines:(NSArray *)polylinesToAdd {
   for (NSDictionary *polyline in polylinesToAdd) {
-    GMSMutablePath *path = [FLTPolylinesController getPath:polyline];
+    GMSMutablePath *path = [FLTPolylinesController pathForPolyline:polyline];
     NSString *identifier = polyline[@"polylineId"];
     FLTGoogleMapPolylineController *controller =
         [[FLTGoogleMapPolylineController alloc] initPolylineWithPath:path
@@ -171,7 +183,7 @@
   }
   return self.polylineIdentifierToController[identifier] != nil;
 }
-+ (GMSMutablePath *)getPath:(NSDictionary *)polyline {
++ (GMSMutablePath *)pathForPolyline:(NSDictionary *)polyline {
   NSArray *pointArray = polyline[@"points"];
   NSArray<CLLocation *> *points = [FLTGoogleMapJSONConversions pointsFromLatLongs:pointArray];
   GMSMutablePath *path = [GMSMutablePath path];

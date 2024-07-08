@@ -4,6 +4,12 @@
 
 #import "FLTGoogleMapJSONConversions.h"
 
+/// Returns dict[key], or nil if dict[key] is NSNull.
+id FGMGetValueOrNilFromDict(NSDictionary *dict, NSString *key) {
+  id value = dict[key];
+  return value == [NSNull null] ? nil : value;
+}
+
 @implementation FLTGoogleMapJSONConversions
 
 + (CLLocationCoordinate2D)locationFromLatLong:(NSArray *)latlong {
@@ -140,5 +146,27 @@
     return [GMSCameraUpdate zoomTo:[channelValue[1] floatValue]];
   }
   return nil;
+}
+
++ (NSArray<GMSStrokeStyle *> *)strokeStylesFromPatterns:(NSArray<NSArray<NSObject *> *> *)patterns
+                                            strokeColor:(UIColor *)strokeColor {
+  NSMutableArray *strokeStyles = [[NSMutableArray alloc] initWithCapacity:[patterns count]];
+  for (NSArray *pattern in patterns) {
+    NSString *patternType = pattern[0];
+    UIColor *color = [patternType isEqualToString:@"gap"] ? [UIColor clearColor] : strokeColor;
+    [strokeStyles addObject:[GMSStrokeStyle solidColor:color]];
+  }
+
+  return strokeStyles;
+}
+
++ (NSArray<NSNumber *> *)spanLengthsFromPatterns:(NSArray<NSArray<NSObject *> *> *)patterns {
+  NSMutableArray *lengths = [[NSMutableArray alloc] initWithCapacity:[patterns count]];
+  for (NSArray *pattern in patterns) {
+    NSNumber *length = [pattern count] > 1 ? pattern[1] : @0;
+    [lengths addObject:length];
+  }
+
+  return lengths;
 }
 @end

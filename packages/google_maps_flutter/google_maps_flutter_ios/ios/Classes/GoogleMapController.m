@@ -83,29 +83,16 @@
                     registrar:(NSObject<FlutterPluginRegistrar> *)registrar {
   GMSCameraPosition *camera =
       [FLTGoogleMapJSONConversions cameraPostionFromDictionary:args[@"initialCameraPosition"]];
-  GMSMapView *mapView;
-  id mapID = nil;
+
+  GMSMapViewOptions *options = [[GMSMapViewOptions alloc] init];
+  options.frame = frame;
+  options.camera = camera;
   NSString *cloudMapId = args[@"options"][@"cloudMapId"];
-
   if (cloudMapId) {
-    Class mapIDClass = NSClassFromString(@"GMSMapID");
-    if (mapIDClass && [mapIDClass respondsToSelector:@selector(mapIDWithIdentifier:)]) {
-      mapID = [mapIDClass mapIDWithIdentifier:cloudMapId];
-    }
+    options.mapID = [GMSMapID mapIDWithIdentifier:cloudMapId];
   }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  // TODO(stuartmorgan): Switch to initWithOptions: once versions older than
-  // iOS 14 are no longer supported by the plugin, or there is a specific need
-  // for its functionality. Since it involves a newly-added class, call it
-  // dynamically is more trouble than it is currently worth.
-  if (mapID && [GMSMapView respondsToSelector:@selector(mapWithFrame:mapID:camera:)]) {
-    mapView = [GMSMapView mapWithFrame:frame mapID:mapID camera:camera];
-  } else {
-    mapView = [GMSMapView mapWithFrame:frame camera:camera];
-  }
-#pragma clang diagnostic pop
+  GMSMapView *mapView = [[GMSMapView alloc] initWithOptions:options];
 
   return [self initWithMapView:mapView viewIdentifier:viewId arguments:args registrar:registrar];
 }
@@ -594,41 +581,41 @@
 }
 
 - (void)interpretMapOptions:(NSDictionary *)data {
-  NSArray *cameraTargetBounds = data[@"cameraTargetBounds"];
-  if (cameraTargetBounds && cameraTargetBounds != (id)[NSNull null]) {
+  NSArray *cameraTargetBounds = FGMGetValueOrNilFromDict(data, @"cameraTargetBounds");
+  if (cameraTargetBounds) {
     [self
         setCameraTargetBounds:cameraTargetBounds.count > 0 && cameraTargetBounds[0] != [NSNull null]
                                   ? [FLTGoogleMapJSONConversions
                                         coordinateBoundsFromLatLongs:cameraTargetBounds.firstObject]
                                   : nil];
   }
-  NSNumber *compassEnabled = data[@"compassEnabled"];
-  if (compassEnabled && compassEnabled != (id)[NSNull null]) {
+  NSNumber *compassEnabled = FGMGetValueOrNilFromDict(data, @"compassEnabled");
+  if (compassEnabled) {
     [self setCompassEnabled:[compassEnabled boolValue]];
   }
-  id indoorEnabled = data[@"indoorEnabled"];
-  if (indoorEnabled && indoorEnabled != [NSNull null]) {
+  id indoorEnabled = FGMGetValueOrNilFromDict(data, @"indoorEnabled");
+  if (indoorEnabled) {
     [self setIndoorEnabled:[indoorEnabled boolValue]];
   }
-  id trafficEnabled = data[@"trafficEnabled"];
-  if (trafficEnabled && trafficEnabled != [NSNull null]) {
+  id trafficEnabled = FGMGetValueOrNilFromDict(data, @"trafficEnabled");
+  if (trafficEnabled) {
     [self setTrafficEnabled:[trafficEnabled boolValue]];
   }
-  id buildingsEnabled = data[@"buildingsEnabled"];
-  if (buildingsEnabled && buildingsEnabled != [NSNull null]) {
+  id buildingsEnabled = FGMGetValueOrNilFromDict(data, @"buildingsEnabled");
+  if (buildingsEnabled) {
     [self setBuildingsEnabled:[buildingsEnabled boolValue]];
   }
-  id mapType = data[@"mapType"];
-  if (mapType && mapType != [NSNull null]) {
+  id mapType = FGMGetValueOrNilFromDict(data, @"mapType");
+  if (mapType) {
     [self setMapType:[FLTGoogleMapJSONConversions mapViewTypeFromTypeValue:mapType]];
   }
-  NSArray *zoomData = data[@"minMaxZoomPreference"];
-  if (zoomData && zoomData != (id)[NSNull null]) {
+  NSArray *zoomData = FGMGetValueOrNilFromDict(data, @"minMaxZoomPreference");
+  if (zoomData) {
     float minZoom = (zoomData[0] == [NSNull null]) ? kGMSMinZoomLevel : [zoomData[0] floatValue];
     float maxZoom = (zoomData[1] == [NSNull null]) ? kGMSMaxZoomLevel : [zoomData[1] floatValue];
     [self setMinZoom:minZoom maxZoom:maxZoom];
   }
-  NSArray *paddingData = data[@"padding"];
+  NSArray *paddingData = FGMGetValueOrNilFromDict(data, @"padding");
   if (paddingData) {
     float top = (paddingData[0] == [NSNull null]) ? 0 : [paddingData[0] floatValue];
     float left = (paddingData[1] == [NSNull null]) ? 0 : [paddingData[1] floatValue];
@@ -637,35 +624,35 @@
     [self setPaddingTop:top left:left bottom:bottom right:right];
   }
 
-  NSNumber *rotateGesturesEnabled = data[@"rotateGesturesEnabled"];
-  if (rotateGesturesEnabled && rotateGesturesEnabled != (id)[NSNull null]) {
+  NSNumber *rotateGesturesEnabled = FGMGetValueOrNilFromDict(data, @"rotateGesturesEnabled");
+  if (rotateGesturesEnabled) {
     [self setRotateGesturesEnabled:[rotateGesturesEnabled boolValue]];
   }
-  NSNumber *scrollGesturesEnabled = data[@"scrollGesturesEnabled"];
-  if (scrollGesturesEnabled && scrollGesturesEnabled != (id)[NSNull null]) {
+  NSNumber *scrollGesturesEnabled = FGMGetValueOrNilFromDict(data, @"scrollGesturesEnabled");
+  if (scrollGesturesEnabled) {
     [self setScrollGesturesEnabled:[scrollGesturesEnabled boolValue]];
   }
-  NSNumber *tiltGesturesEnabled = data[@"tiltGesturesEnabled"];
-  if (tiltGesturesEnabled && tiltGesturesEnabled != (id)[NSNull null]) {
+  NSNumber *tiltGesturesEnabled = FGMGetValueOrNilFromDict(data, @"tiltGesturesEnabled");
+  if (tiltGesturesEnabled) {
     [self setTiltGesturesEnabled:[tiltGesturesEnabled boolValue]];
   }
-  NSNumber *trackCameraPosition = data[@"trackCameraPosition"];
-  if (trackCameraPosition && trackCameraPosition != (id)[NSNull null]) {
+  NSNumber *trackCameraPosition = FGMGetValueOrNilFromDict(data, @"trackCameraPosition");
+  if (trackCameraPosition) {
     [self setTrackCameraPosition:[trackCameraPosition boolValue]];
   }
-  NSNumber *zoomGesturesEnabled = data[@"zoomGesturesEnabled"];
-  if (zoomGesturesEnabled && zoomGesturesEnabled != (id)[NSNull null]) {
+  NSNumber *zoomGesturesEnabled = FGMGetValueOrNilFromDict(data, @"zoomGesturesEnabled");
+  if (zoomGesturesEnabled) {
     [self setZoomGesturesEnabled:[zoomGesturesEnabled boolValue]];
   }
-  NSNumber *myLocationEnabled = data[@"myLocationEnabled"];
-  if (myLocationEnabled && myLocationEnabled != (id)[NSNull null]) {
+  NSNumber *myLocationEnabled = FGMGetValueOrNilFromDict(data, @"myLocationEnabled");
+  if (myLocationEnabled) {
     [self setMyLocationEnabled:[myLocationEnabled boolValue]];
   }
-  NSNumber *myLocationButtonEnabled = data[@"myLocationButtonEnabled"];
-  if (myLocationButtonEnabled && myLocationButtonEnabled != (id)[NSNull null]) {
+  NSNumber *myLocationButtonEnabled = FGMGetValueOrNilFromDict(data, @"myLocationButtonEnabled");
+  if (myLocationButtonEnabled) {
     [self setMyLocationButtonEnabled:[myLocationButtonEnabled boolValue]];
   }
-  NSString *style = data[@"style"];
+  NSString *style = FGMGetValueOrNilFromDict(data, @"style");
   if (style) {
     self.styleError = [self setMapStyle:style];
   }

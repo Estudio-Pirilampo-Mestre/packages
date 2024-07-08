@@ -38,6 +38,7 @@ class MarkdownStyleSheet {
     this.tableHead,
     this.tableBody,
     this.tableHeadAlign,
+    this.tablePadding,
     this.tableBorder,
     this.tableColumnWidth,
     this.tableCellsPadding,
@@ -60,10 +61,9 @@ class MarkdownStyleSheet {
     this.orderedListAlign = WrapAlignment.start,
     this.blockquoteAlign = WrapAlignment.start,
     this.codeblockAlign = WrapAlignment.start,
+    this.superscriptFontFeatureTag,
     @Deprecated('Use textScaler instead.') this.textScaleFactor,
     TextScaler? textScaler,
-    this.customBlockAlignments = const <String, WrapAlignment>{},
-    this.customBlockTextStyles = const <String, TextStyle?>{},
   })  : assert(
           textScaler == null || textScaleFactor == null,
           'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
@@ -95,7 +95,6 @@ class MarkdownStyleSheet {
           'th': tableHead,
           'tr': tableBody,
           'td': tableBody,
-          ...customBlockTextStyles,
         };
 
   /// Creates a [MarkdownStyleSheet] from the [TextStyle]s in the provided [ThemeData].
@@ -137,6 +136,7 @@ class MarkdownStyleSheet {
       tableHead: const TextStyle(fontWeight: FontWeight.w600),
       tableBody: theme.textTheme.bodyMedium,
       tableHeadAlign: TextAlign.center,
+      tablePadding: const EdgeInsets.only(bottom: 4.0),
       tableBorder: TableBorder.all(
         color: theme.dividerColor,
       ),
@@ -234,6 +234,7 @@ class MarkdownStyleSheet {
       ),
       tableBody: theme.textTheme.textStyle,
       tableHeadAlign: TextAlign.center,
+      tablePadding: const EdgeInsets.only(bottom: 8),
       tableBorder: TableBorder.all(color: CupertinoColors.separator, width: 0),
       tableColumnWidth: const FlexColumnWidth(),
       tableCellsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -315,6 +316,7 @@ class MarkdownStyleSheet {
       tableHead: const TextStyle(fontWeight: FontWeight.w600),
       tableBody: theme.textTheme.bodyMedium,
       tableHeadAlign: TextAlign.center,
+      tablePadding: const EdgeInsets.only(bottom: 4.0),
       tableBorder: TableBorder.all(
         color: theme.dividerColor,
       ),
@@ -374,6 +376,7 @@ class MarkdownStyleSheet {
     TextStyle? tableHead,
     TextStyle? tableBody,
     TextAlign? tableHeadAlign,
+    EdgeInsets? tablePadding,
     TableBorder? tableBorder,
     TableColumnWidth? tableColumnWidth,
     EdgeInsets? tableCellsPadding,
@@ -396,10 +399,9 @@ class MarkdownStyleSheet {
     WrapAlignment? orderedListAlign,
     WrapAlignment? blockquoteAlign,
     WrapAlignment? codeblockAlign,
+    String? superscriptFontFeatureTag,
     @Deprecated('Use textScaler instead.') double? textScaleFactor,
     TextScaler? textScaler,
-    Map<String, WrapAlignment>? customBlockAlignments,
-    Map<String, TextStyle?>? customBlockTextStyles,
   }) {
     assert(
       textScaler == null || textScaleFactor == null,
@@ -441,6 +443,7 @@ class MarkdownStyleSheet {
       tableHead: tableHead ?? this.tableHead,
       tableBody: tableBody ?? this.tableBody,
       tableHeadAlign: tableHeadAlign ?? this.tableHeadAlign,
+      tablePadding: tablePadding ?? this.tablePadding,
       tableBorder: tableBorder ?? this.tableBorder,
       tableColumnWidth: tableColumnWidth ?? this.tableColumnWidth,
       tableCellsPadding: tableCellsPadding ?? this.tableCellsPadding,
@@ -466,12 +469,10 @@ class MarkdownStyleSheet {
       orderedListAlign: orderedListAlign ?? this.orderedListAlign,
       blockquoteAlign: blockquoteAlign ?? this.blockquoteAlign,
       codeblockAlign: codeblockAlign ?? this.codeblockAlign,
+      superscriptFontFeatureTag:
+          superscriptFontFeatureTag ?? this.superscriptFontFeatureTag,
       textScaler: newTextScaler,
       textScaleFactor: nextTextScaleFactor,
-      customBlockAlignments:
-          customBlockAlignments ?? this.customBlockAlignments,
-      customBlockTextStyles:
-          customBlockTextStyles ?? this.customBlockTextStyles,
     );
   }
 
@@ -511,6 +512,7 @@ class MarkdownStyleSheet {
       tableHead: tableHead!.merge(other.tableHead),
       tableBody: tableBody!.merge(other.tableBody),
       tableHeadAlign: other.tableHeadAlign,
+      tablePadding: other.tablePadding,
       tableBorder: other.tableBorder,
       tableColumnWidth: other.tableColumnWidth,
       tableCellsPadding: other.tableCellsPadding,
@@ -534,13 +536,12 @@ class MarkdownStyleSheet {
       blockquoteAlign: other.blockquoteAlign,
       codeblockAlign: other.codeblockAlign,
       textScaleFactor: other.textScaleFactor,
+      superscriptFontFeatureTag: other.superscriptFontFeatureTag,
       // Only one of textScaler and textScaleFactor can be passed. If
       // other.textScaleFactor is non-null, then the sheet was created with a
       // textScaleFactor and the textScaler was derived from that, so should be
       // ignored so that the textScaleFactor continues to be set.
       textScaler: other.textScaleFactor == null ? other.textScaler : null,
-      customBlockAlignments: other.customBlockAlignments,
-      customBlockTextStyles: other.customBlockTextStyles,
     );
   }
 
@@ -631,6 +632,9 @@ class MarkdownStyleSheet {
   /// The [TextAlign] to use for `th` elements.
   final TextAlign? tableHeadAlign;
 
+  /// The padding to use for `table` elements.
+  final EdgeInsets? tablePadding;
+
   /// The [TableBorder] to use for `table` elements.
   final TableBorder? tableBorder;
 
@@ -707,15 +711,9 @@ class MarkdownStyleSheet {
   @Deprecated('Use textScaler instead.')
   final double? textScaleFactor;
 
-  /// Alignments for custom Block elements.
-  ///
-  /// The key is the node's tag.
-  final Map<String, WrapAlignment> customBlockAlignments;
-
-  /// Text style for custom Block elements.
-  ///
-  /// The key is the node's tag.
-  final Map<String, TextStyle?> customBlockTextStyles;
+  /// Custom font feature tag for font which does not support `sups'
+  /// feature to create superscript in footnotes.
+  final String? superscriptFontFeatureTag;
 
   /// A [Map] from element name to the corresponding [TextStyle] object.
   Map<String, TextStyle?> get styles => _styles;
@@ -760,6 +758,7 @@ class MarkdownStyleSheet {
         other.tableHead == tableHead &&
         other.tableBody == tableBody &&
         other.tableHeadAlign == tableHeadAlign &&
+        other.tablePadding == tablePadding &&
         other.tableBorder == tableBorder &&
         other.tableColumnWidth == tableColumnWidth &&
         other.tableCellsPadding == tableCellsPadding &&
@@ -782,9 +781,8 @@ class MarkdownStyleSheet {
         other.orderedListAlign == orderedListAlign &&
         other.blockquoteAlign == blockquoteAlign &&
         other.codeblockAlign == codeblockAlign &&
-        other.textScaler == textScaler &&
-        other.customBlockAlignments == customBlockAlignments &&
-        other.customBlockTextStyles == customBlockTextStyles;
+        other.superscriptFontFeatureTag == superscriptFontFeatureTag &&
+        other.textScaler == textScaler;
   }
 
   @override
@@ -820,6 +818,7 @@ class MarkdownStyleSheet {
       tableHead,
       tableBody,
       tableHeadAlign,
+      tablePadding,
       tableBorder,
       tableColumnWidth,
       tableCellsPadding,
@@ -844,8 +843,7 @@ class MarkdownStyleSheet {
       codeblockAlign,
       textScaler,
       textScaleFactor,
-      customBlockAlignments,
-      customBlockTextStyles,
+      superscriptFontFeatureTag,
     ]);
   }
 }
