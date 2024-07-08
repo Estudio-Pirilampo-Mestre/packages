@@ -64,6 +64,8 @@ class MarkdownStyleSheet {
     this.superscriptFontFeatureTag,
     @Deprecated('Use textScaler instead.') this.textScaleFactor,
     TextScaler? textScaler,
+    this.customBlockAlignments = const <String, WrapAlignment>{},
+    this.customBlockTextStyles = const <String, TextStyle?>{},
   })  : assert(
           textScaler == null || textScaleFactor == null,
           'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
@@ -95,6 +97,7 @@ class MarkdownStyleSheet {
           'th': tableHead,
           'tr': tableBody,
           'td': tableBody,
+          ...customBlockTextStyles,
         };
 
   /// Creates a [MarkdownStyleSheet] from the [TextStyle]s in the provided [ThemeData].
@@ -402,6 +405,8 @@ class MarkdownStyleSheet {
     String? superscriptFontFeatureTag,
     @Deprecated('Use textScaler instead.') double? textScaleFactor,
     TextScaler? textScaler,
+    Map<String, WrapAlignment>? customBlockAlignments,
+    Map<String, TextStyle?>? customBlockTextStyles,
   }) {
     assert(
       textScaler == null || textScaleFactor == null,
@@ -473,6 +478,10 @@ class MarkdownStyleSheet {
           superscriptFontFeatureTag ?? this.superscriptFontFeatureTag,
       textScaler: newTextScaler,
       textScaleFactor: nextTextScaleFactor,
+      customBlockAlignments:
+          customBlockAlignments ?? this.customBlockAlignments,
+      customBlockTextStyles:
+          customBlockTextStyles ?? this.customBlockTextStyles,
     );
   }
 
@@ -542,6 +551,8 @@ class MarkdownStyleSheet {
       // textScaleFactor and the textScaler was derived from that, so should be
       // ignored so that the textScaleFactor continues to be set.
       textScaler: other.textScaleFactor == null ? other.textScaler : null,
+      customBlockAlignments: other.customBlockAlignments,
+      customBlockTextStyles: other.customBlockTextStyles,
     );
   }
 
@@ -711,6 +722,16 @@ class MarkdownStyleSheet {
   @Deprecated('Use textScaler instead.')
   final double? textScaleFactor;
 
+  /// Alignments for custom Block elements.
+  ///
+  /// The key is the node's tag.
+  final Map<String, WrapAlignment> customBlockAlignments;
+
+  /// Text style for custom Block elements.
+  ///
+  /// The key is the node's tag.
+  final Map<String, TextStyle?> customBlockTextStyles;
+
   /// Custom font feature tag for font which does not support `sups'
   /// feature to create superscript in footnotes.
   final String? superscriptFontFeatureTag;
@@ -781,8 +802,10 @@ class MarkdownStyleSheet {
         other.orderedListAlign == orderedListAlign &&
         other.blockquoteAlign == blockquoteAlign &&
         other.codeblockAlign == codeblockAlign &&
-        other.superscriptFontFeatureTag == superscriptFontFeatureTag &&
-        other.textScaler == textScaler;
+        other.textScaler == textScaler &&
+        other.customBlockAlignments == customBlockAlignments &&
+        other.customBlockTextStyles == customBlockTextStyles &&
+        other.superscriptFontFeatureTag == superscriptFontFeatureTag;
   }
 
   @override
@@ -843,6 +866,8 @@ class MarkdownStyleSheet {
       codeblockAlign,
       textScaler,
       textScaleFactor,
+      customBlockAlignments,
+      customBlockTextStyles,
       superscriptFontFeatureTag,
     ]);
   }
