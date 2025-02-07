@@ -365,7 +365,8 @@ class MarkdownBuilder implements md.NodeVisitor {
       child = _buildRichText(
         TextSpan(
           style: _isInBlockquote
-              ? _inlines.last.style?.merge(styleSheet.blockquote) ?? styleSheet.blockquote
+              ? _inlines.last.style?.merge(styleSheet.blockquote) ??
+                  styleSheet.blockquote
               : _inlines.last.style,
           text: trimText(text.text),
           recognizer: _linkHandlers.isNotEmpty ? _linkHandlers.last : null,
@@ -407,13 +408,29 @@ class MarkdownBuilder implements md.NodeVisitor {
         _isInBlockquote = false;
       }
 
-      Widget child = builders[tag]?.visitElementAfterWithContext(
+      Widget child;
+      final MarkdownElementBuilder? builder = builders[tag];
+
+      if (builder != null) {
+        if (builder is MarkdownBlockBuilder) {
+          child = builder.visitElementAfterWithContext(
             delegate.context,
             element,
             styleSheet.styles[tag],
             _inlines.isNotEmpty ? _inlines.last.style : null,
-          ) ??
-          defaultChild();
+            child: defaultChild(),
+          );
+        } else {
+          child = builder.visitElementAfterWithContext(
+            delegate.context,
+            element,
+            styleSheet.styles[tag],
+            _inlines.isNotEmpty ? _inlines.last.style : null,
+          )!;
+        }
+      } else {
+        child = defaultChild();
+      }
 
       if (_isListTag(tag)) {
         assert(_listIndents.isNotEmpty);
