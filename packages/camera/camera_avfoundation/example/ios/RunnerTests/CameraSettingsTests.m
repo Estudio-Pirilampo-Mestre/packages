@@ -3,11 +3,16 @@
 // found in the LICENSE file.
 
 @import camera_avfoundation;
+#if __has_include(<camera_avfoundation/camera_avfoundation-umbrella.h>)
 @import camera_avfoundation.Test;
+#endif
 @import XCTest;
 @import AVFoundation;
 #import <OCMock/OCMock.h>
+
 #import "CameraTestUtils.h"
+#import "MockFlutterBinaryMessenger.h"
+#import "MockFlutterTextureRegistry.h"
 
 static const FCPPlatformResolutionPreset gTestResolutionPreset = FCPPlatformResolutionPresetMedium;
 static const int gTestFramesPerSecond = 15;
@@ -142,7 +147,7 @@ static const BOOL gTestEnableAudio = YES;
       [[TestMediaSettingsAVWrapper alloc] initWithTestCase:self];
 
   FLTCam *camera = FLTCreateCamWithCaptureSessionQueueAndMediaSettings(
-      dispatch_queue_create("test", NULL), settings, injectedWrapper);
+      dispatch_queue_create("test", NULL), settings, injectedWrapper, nil, nil);
 
   // Expect FPS configuration is passed to camera device.
   [self waitForExpectations:@[
@@ -165,7 +170,9 @@ static const BOOL gTestEnableAudio = YES;
 }
 
 - (void)testSettings_ShouldBeSupportedByMethodCall {
-  CameraPlugin *camera = [[CameraPlugin alloc] initWithRegistry:nil messenger:nil];
+  CameraPlugin *camera =
+      [[CameraPlugin alloc] initWithRegistry:[[MockFlutterTextureRegistry alloc] init]
+                                   messenger:[[MockFlutterBinaryMessenger alloc] init]];
 
   XCTestExpectation *expectation = [self expectationWithDescription:@"Result finished"];
 
@@ -198,6 +205,22 @@ static const BOOL gTestEnableAudio = YES;
 
   // Verify the result
   XCTAssertNotNil(resultValue);
+}
+
+- (void)testSettings_ShouldSelectFormatWhichSupports60FPS {
+  FCPPlatformMediaSettings *settings =
+      [FCPPlatformMediaSettings makeWithResolutionPreset:gTestResolutionPreset
+                                         framesPerSecond:@(60)
+                                            videoBitrate:@(gTestVideoBitrate)
+                                            audioBitrate:@(gTestAudioBitrate)
+                                             enableAudio:gTestEnableAudio];
+
+  FLTCam *camera = FLTCreateCamWithCaptureSessionQueueAndMediaSettings(
+      dispatch_queue_create("test", NULL), settings, nil, nil, nil);
+
+  AVFrameRateRange *range = camera.captureDevice.activeFormat.videoSupportedFrameRateRanges[0];
+  XCTAssertLessThanOrEqual(range.minFrameRate, 60);
+  XCTAssertGreaterThanOrEqual(range.maxFrameRate, 60);
 }
 
 @end

@@ -41,6 +41,7 @@ class MarkdownStyleSheet {
     this.tablePadding,
     this.tableBorder,
     this.tableColumnWidth,
+    this.tableScrollbarThumbVisibility,
     this.tableCellsPadding,
     this.tableCellsDecoration,
     this.tableVerticalAlignment = TableCellVerticalAlignment.middle,
@@ -108,7 +109,7 @@ class MarkdownStyleSheet {
       p: theme.textTheme.bodyMedium,
       pPadding: EdgeInsets.zero,
       code: theme.textTheme.bodyMedium!.copyWith(
-        backgroundColor: theme.cardTheme.color ?? theme.cardColor,
+        backgroundColor: theme.cardTheme.color,
         fontFamily: 'monospace',
         fontSize: theme.textTheme.bodyMedium!.fontSize! * 0.85,
       ),
@@ -179,9 +180,6 @@ class MarkdownStyleSheet {
       p: theme.textTheme.textStyle,
       pPadding: EdgeInsets.zero,
       code: theme.textTheme.textStyle.copyWith(
-        backgroundColor: theme.brightness == Brightness.dark
-            ? CupertinoColors.systemGrey6.darkColor
-            : CupertinoColors.systemGrey6.color,
         fontFamily: 'monospace',
         fontSize: theme.textTheme.textStyle.fontSize! * 0.85,
       ),
@@ -288,7 +286,7 @@ class MarkdownStyleSheet {
       p: theme.textTheme.bodyMedium,
       pPadding: EdgeInsets.zero,
       code: theme.textTheme.bodyMedium!.copyWith(
-        backgroundColor: theme.cardTheme.color ?? theme.cardColor,
+        backgroundColor: theme.cardTheme.color,
         fontFamily: 'monospace',
         fontSize: theme.textTheme.bodyMedium!.fontSize! * 0.85,
       ),
@@ -382,6 +380,7 @@ class MarkdownStyleSheet {
     EdgeInsets? tablePadding,
     TableBorder? tableBorder,
     TableColumnWidth? tableColumnWidth,
+    bool? tableScrollbarThumbVisibility,
     EdgeInsets? tableCellsPadding,
     Decoration? tableCellsDecoration,
     TableCellVerticalAlignment? tableVerticalAlignment,
@@ -451,6 +450,7 @@ class MarkdownStyleSheet {
       tablePadding: tablePadding ?? this.tablePadding,
       tableBorder: tableBorder ?? this.tableBorder,
       tableColumnWidth: tableColumnWidth ?? this.tableColumnWidth,
+      tableScrollbarThumbVisibility: tableScrollbarThumbVisibility,
       tableCellsPadding: tableCellsPadding ?? this.tableCellsPadding,
       tableCellsDecoration: tableCellsDecoration ?? this.tableCellsDecoration,
       tableVerticalAlignment:
@@ -524,6 +524,7 @@ class MarkdownStyleSheet {
       tablePadding: other.tablePadding,
       tableBorder: other.tableBorder,
       tableColumnWidth: other.tableColumnWidth,
+      tableScrollbarThumbVisibility: other.tableScrollbarThumbVisibility,
       tableCellsPadding: other.tableCellsPadding,
       tableCellsDecoration: other.tableCellsDecoration,
       tableVerticalAlignment: other.tableVerticalAlignment,
@@ -651,6 +652,9 @@ class MarkdownStyleSheet {
 
   /// The [TableColumnWidth] to use for `th` and `td` elements.
   final TableColumnWidth? tableColumnWidth;
+
+  /// The scrollbar thumbVisibility when the table is scrollable.
+  final bool? tableScrollbarThumbVisibility;
 
   /// The padding to use for `th` and `td` elements.
   final EdgeInsets? tableCellsPadding;

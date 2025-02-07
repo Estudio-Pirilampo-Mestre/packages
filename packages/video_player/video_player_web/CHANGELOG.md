@@ -1,3 +1,16 @@
+## 2.3.4
+
+* Adjusts the code to the new platform interface.
+
+## 2.3.3
+
+* Updates minimum supported SDK version to Flutter 3.22/Dart 3.4.
+* Corrects the behavior of muting/unmuting videos in Chrome's Tap Emulation mode.
+
+## 2.3.2
+
+* Adds support for `web: ^1.0.0`.
+
 ## 2.3.1
 
 * Fixes some `package:web` tweaks.

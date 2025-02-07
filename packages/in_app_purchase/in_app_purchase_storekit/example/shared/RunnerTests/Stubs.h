@@ -11,7 +11,11 @@
 #import "FLTRequestHandlerProtocol.h"
 #import "FLTTransactionCacheProtocol.h"
 
+#if __has_include(<in_app_purchase_storekit/in_app_purchase_storekit.h>)
 @import in_app_purchase_storekit;
+#else
+@import in_app_purchase_storekit_objc;
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 API_AVAILABLE(ios(11.2), macos(10.13.2))
@@ -83,7 +87,7 @@ API_AVAILABLE(ios(13.0), macos(10.15))
 @property(nonatomic, strong, nullable) id<SKPaymentTransactionObserver> observer;
 @property(nonatomic, strong, readwrite) SKStorefront *storefront API_AVAILABLE(ios(13.0));
 @property(nonatomic, strong, readwrite) NSArray<SKPaymentTransaction *> *transactions API_AVAILABLE(
-    ios(3.0), macos(10.7), watchos(6.2), visionos(1.0));
+    ios(3.0), macos(10.7), watchos(6.2));
 
 // Test Properties
 @property(nonatomic, assign)
@@ -117,10 +121,10 @@ API_AVAILABLE(ios(13.0), macos(10.15))
 @interface MethodChannelStub : NSObject <FLTMethodChannelProtocol>
 
 // Stubs
-@property(nonatomic, copy, nullable) void (^invokeMethodChannelStub)(NSString *method, id arguments)
-    ;
+@property(nonatomic, copy, nullable) void (^invokeMethodChannelStub)
+    (NSString *method, id _Nullable arguments);
 @property(nonatomic, copy, nullable) void (^invokeMethodChannelWithResultsStub)
-    (NSString *method, id arguments, FlutterResult _Nullable);
+    (NSString *method, id _Nullable arguments, FlutterResult _Nullable);
 
 @end
 

@@ -7,7 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../platform_interface/platform_interface.dart';
-import 'enum_converter_extensions.dart';
+import 'android_ads_rendering_settings.dart';
+import 'enum_converter_utils.dart';
 import 'interactive_media_ads.g.dart' as ima;
 import 'interactive_media_ads_proxy.dart';
 
@@ -32,8 +33,15 @@ class AndroidAdsManager extends PlatformAdsManager {
   }
 
   @override
-  Future<void> init(AdsManagerInitParams params) {
-    return _manager.init();
+  Future<void> init({PlatformAdsRenderingSettings? settings}) async {
+    ima.AdsRenderingSettings? nativeSettings;
+    if (settings != null) {
+      nativeSettings = settings is AndroidAdsRenderingSettings
+          ? await settings.nativeSettings
+          : await AndroidAdsRenderingSettings(settings.params).nativeSettings;
+    }
+
+    await _manager.init(nativeSettings);
   }
 
   @override
@@ -49,6 +57,26 @@ class AndroidAdsManager extends PlatformAdsManager {
     return _manager.start();
   }
 
+  @override
+  Future<void> discardAdBreak() {
+    return _manager.discardAdBreak();
+  }
+
+  @override
+  Future<void> pause() {
+    return _manager.pause();
+  }
+
+  @override
+  Future<void> resume() {
+    return _manager.resume();
+  }
+
+  @override
+  Future<void> skip() {
+    return _manager.skip();
+  }
+
   // This value is created in a static method because the callback methods for
   // any wrapped classes must not reference the encapsulating object. This is to
   // prevent a circular reference that prevents garbage collection.
@@ -57,14 +85,13 @@ class AndroidAdsManager extends PlatformAdsManager {
     weakThis.target?._manager.addAdEventListener(
       proxy.newAdEventListener(
         onAdEvent: (_, ima.AdEvent event) {
-          late final AdEventType? eventType =
-              event.type.asInterfaceAdEventType();
-          if (eventType == null) {
-            return;
-          }
-
-          weakThis.target?._managerDelegate?.params.onAdEvent
-              ?.call(AdEvent(type: eventType));
+          weakThis.target?._managerDelegate?.params.onAdEvent?.call(
+            AdEvent(
+              type: toInterfaceEventType(event.type),
+              adData:
+                  event.adData?.cast<String, String>() ?? <String, String>{},
+            ),
+          );
         },
       ),
     );
@@ -74,8 +101,8 @@ class AndroidAdsManager extends PlatformAdsManager {
           weakThis.target?._managerDelegate?.params.onAdErrorEvent?.call(
             AdErrorEvent(
               error: AdError(
-                type: event.error.errorType.asInterfaceErrorType(),
-                code: event.error.errorCode.asInterfaceErrorCode(),
+                type: toInterfaceErrorType(event.error.errorType),
+                code: toInterfaceErrorCode(event.error.errorCode),
                 message: event.error.message,
               ),
             ),
