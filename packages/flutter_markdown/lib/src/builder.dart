@@ -362,12 +362,26 @@ class MarkdownBuilder implements md.NodeVisitor {
           },
           child: _buildRichText(delegate.formatText(styleSheet, text.text)));
     } else {
+      TextStyle? style;
+
+      if (_isInBlockquote) {
+        // The paragraph style is the default, so use it to merge with the
+        // blockquote style (if any).
+        style =
+            styleSheet.p?.merge(styleSheet.blockquote) ?? styleSheet.blockquote;
+
+        // Then if this is not a paragraph, merge with the last inline style
+        // to handle titles, bold, italics, etc.
+        if (_inlines.last.tag != 'p') {
+          style = style?.merge(_inlines.last.style);
+        }
+      } else {
+        style = _inlines.last.style;
+      }
+
       child = _buildRichText(
         TextSpan(
-          style: _isInBlockquote
-              ? _inlines.last.style?.merge(styleSheet.blockquote) ??
-                  styleSheet.blockquote
-              : _inlines.last.style,
+          style: style,
           text: trimText(text.text),
           recognizer: _linkHandlers.isNotEmpty ? _linkHandlers.last : null,
         ),
