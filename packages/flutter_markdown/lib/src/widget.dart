@@ -384,11 +384,6 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
   }
 
   void _parseMarkdown() {
-    final MarkdownStyleSheet fallbackStyleSheet =
-        kFallbackStyle(context, widget.styleSheetTheme);
-    final MarkdownStyleSheet styleSheet =
-        fallbackStyleSheet.merge(widget.styleSheet);
-
     _disposeRecognizers();
 
     final md.Document document = md.Document(
@@ -407,7 +402,8 @@ class _MarkdownWidgetState extends State<MarkdownWidget>
     final MarkdownBuilder builder = MarkdownBuilder(
       delegate: this,
       selectable: widget.selectable,
-      styleSheet: styleSheet,
+      styleSheet:
+          widget.styleSheet ?? kFallbackStyle(context, widget.styleSheetTheme),
       imageDirectory: widget.imageDirectory,
       imageBuilder: widget.imageBuilder,
       checkboxBuilder: widget.checkboxBuilder,
