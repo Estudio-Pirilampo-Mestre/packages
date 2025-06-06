@@ -473,8 +473,9 @@ class MarkdownBuilder implements md.NodeVisitor {
           );
         }
       } else if (tag == 'table') {
-        if (styleSheet.tableColumnWidth is FixedColumnWidth ||
-            styleSheet.tableColumnWidth is IntrinsicColumnWidth) {
+        // If the columnWidth depends on the table's total width (like a flex or
+        // fraction), it should not contain a ScrollView.
+        if (_canColumnWidthHaveScroll(styleSheet.tableColumnWidth!)) {
           child = _ScrollControllerBuilder(
             builder: (BuildContext context,
                 ScrollController tableScrollController, Widget? child) {
@@ -608,6 +609,21 @@ class MarkdownBuilder implements md.NodeVisitor {
       _currentBlockTag = null;
     }
     _lastVisitedTag = tag;
+  }
+
+  bool _canColumnWidthHaveScroll(TableColumnWidth columnWidth) {
+    if (columnWidth is MaxColumnWidth) {
+      return _canColumnWidthHaveScroll(columnWidth.a) &&
+          _canColumnWidthHaveScroll(columnWidth.b);
+    } else if (columnWidth is MinColumnWidth) {
+      return _canColumnWidthHaveScroll(columnWidth.a) &&
+          _canColumnWidthHaveScroll(columnWidth.b);
+    } else if (columnWidth is FlexColumnWidth ||
+        columnWidth is FractionColumnWidth) {
+      return false;
+    }
+
+    return true;
   }
 
   Table _buildTable() {
