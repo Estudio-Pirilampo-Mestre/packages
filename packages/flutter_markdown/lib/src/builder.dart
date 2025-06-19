@@ -409,7 +409,20 @@ class MarkdownBuilder implements md.NodeVisitor {
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: fitContent
-                ? CrossAxisAlignment.start
+                ? switch (_wrapAlignmentForBlockTag(tag)) {
+                    // Start
+                    WrapAlignment.spaceAround ||
+                    WrapAlignment.spaceBetween ||
+                    WrapAlignment.spaceEvenly ||
+                    WrapAlignment.start =>
+                      CrossAxisAlignment.start,
+
+                    // Center
+                    WrapAlignment.center => CrossAxisAlignment.center,
+
+                    // End
+                    WrapAlignment.end => CrossAxisAlignment.end,
+                  }
                 : CrossAxisAlignment.stretch,
             children: current.children,
           );
